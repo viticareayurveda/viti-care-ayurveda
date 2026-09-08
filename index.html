@@ -69,22 +69,57 @@
     .modal input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-size: 16px; letter-spacing: 4px; }
     #printable-grid { display: none; }
 
+    /* STRICT PRINT STYLES - OPTIMIZED HEIGHT & SPACING */
     @media print {
-      @page { size: A4 portrait; margin: 5mm; }
+      @page { size: A4 portrait; margin: 4mm; }
       body * { visibility: hidden !important; }
       #printable-grid, #printable-grid * { visibility: visible !important; }
-      #printable-grid { display: grid !important; grid-template-columns: 1fr 1fr; grid-template-rows: 135mm 135mm; gap: 5mm; width: 200mm; height: 277mm; position: absolute; top: 0; left: 0; background: #fff; }
-      .exact-ship-label { border: 2px solid #000; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, sans-serif; height: 135mm; overflow: hidden; }
-      .label-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1.5px solid #000; padding-bottom: 6px; }
+      #printable-grid { 
+        display: grid !important; 
+        grid-template-columns: 1fr 1fr; 
+        grid-template-rows: repeat(2, auto); 
+        gap: 4mm; 
+        width: 200mm; 
+        position: absolute; 
+        top: 0; 
+        left: 0; 
+        background: #fff; 
+      }
+      .exact-ship-label { 
+        border: 2px solid #000; 
+        padding: 10px; 
+        box-sizing: border-box; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        font-family: Arial, sans-serif; 
+        background: #fff;
+      }
+      .label-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start; 
+        border-bottom: 1.5px solid #000; 
+        padding-bottom: 8px; 
+      }
       .amount-box { text-align: right; }
-      .amount-title { font-size: 12px; font-weight: 900; }
-      .amount-val { font-size: 13px; font-weight: 900; }
-      .amount-words { font-size: 8px; font-weight: bold; text-transform: uppercase; }
-      .to-section { border-bottom: 1.5px solid #000; padding: 6px 0; flex-grow: 1; }
-      .patient-name { font-size: 13px; font-weight: 900; text-transform: uppercase; margin: 2px 0; }
-      .patient-address { font-size: 10px; line-height: 1.25; text-transform: uppercase; margin-top: 3px; }
-      .patient-phone { font-size: 12px; font-weight: 900; margin-top: 4px; }
-      .from-section { padding-top: 6px; font-size: 9px; line-height: 1.2; text-transform: uppercase; }
+      .amount-title { font-size: 13px; font-weight: 900; }
+      .amount-val { font-size: 14px; font-weight: 900; margin-top: 2px; }
+      .amount-words { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
+      .to-section { 
+        border-bottom: 1.5px solid #000; 
+        padding: 10px 0; 
+      }
+      .patient-name { font-size: 15px; font-weight: 900; text-transform: uppercase; margin: 4px 0; }
+      .patient-address { font-size: 11px; line-height: 1.35; text-transform: uppercase; margin-top: 6px; }
+      .patient-phone { font-size: 14px; font-weight: 900; margin-top: 8px; }
+      .meta-info { font-size: 10px; margin-top: 8px; line-height: 1.3; }
+      .from-section { 
+        padding-top: 8px; 
+        font-size: 10px; 
+        line-height: 1.3; 
+        text-transform: uppercase; 
+      }
     }
   </style>
 </head>
@@ -396,30 +431,4 @@
 
       selectedItems.forEach(item => {
         printGrid.innerHTML += `
-          <div class="exact-ship-label">
-            <div class="label-header">
-              <div class="brand-logo-text"><span style="font-size:12px; color:#2e7d32; font-weight:bold;">🌿 VITI CARE AYURVEDA</span></div>
-              <div class="amount-box">
-                <div class="amount-title">VP ${item.paymentType} PARCEL</div>
-                <div class="amount-val">VP AMOUNT- ${item.amount}</div>
-                <div class="amount-words">${numberToWords(item.amount)}</div>
-                <div style="font-size:9px;">Weight- ${item.weight}</div>
-              </div>
-            </div>
-            <div class="to-section">
-              <div style="font-weight:bold; font-size:11px;">To</div>
-              <div class="patient-name">${item.patientName}</div>
-              ${item.coName ? `<div style="font-size:10px; font-weight:bold;">${item.coName}</div>` : ''}
-              <div class="patient-address">${item.address}<br>DIST - ${item.districtState}<br>PINCODE - ${item.pincode}</div>
-              <div class="patient-phone">${item.mobile}</div>
-              <div style="font-size:9px; margin-top:4px;">Product: ${item.product || 'MEDICINE'}<br>Order #: ${item.orderNo}</div>
-            </div>
-            <div class="from-section"><strong>FROM -</strong><br>${item.from}</div>
-          </div>
-        `;
-      });
-      window.print();
-    }
-  </script>
-</body>
-</html>
+          <div class="exact
