@@ -2,219 +2,262 @@
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<title>Viti Care 4-in-1 Labels</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viti Care Ayurveda - Shipping Management System</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
-  @page {
-    size: A4 portrait;
-    margin: 3mm;
+  :root {
+    --primary: #0F5243;
+    --leaf: #50825B;
+    --bg: #f4f7f6;
   }
-  * {
-    box-sizing: border-box;
-  }
+  
   body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background: #fff;
+    background: var(--bg);
+    color: #333;
   }
-  .grid-container {
-    width: 200mm;
-    height: 285mm;
+
+  /* Admin Header & Form Area */
+  .no-print {
+    max-width: 1100px;
+    margin: 20px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .header-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--primary);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+  }
+
+  .header-banner h1 {
+    color: var(--primary);
+    margin: 0;
+    font-size: 24px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
+
+  button {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: var(--leaf);
+  }
+
+  /* Print Specific Styles - 4 Labels Per Sheet */
+  @page {
+    size: A4 portrait;
+    margin: 4mm;
+  }
+
+  .print-area {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 3mm;
-    padding: 2mm;
+    grid-template-rows: 135mm 135mm;
+    gap: 4mm;
+    width: 200mm;
+    height: 278mm;
     margin: auto;
+    box-sizing: border-box;
   }
+
   .label-box {
-    border: 1.5px solid #000;
-    padding: 6px;
+    border: 2px dashed var(--primary);
+    border-radius: 6px;
+    padding: 8px;
+    background: #fff;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    font-size: 10px;
-    line-height: 1.25;
-    background: #fff;
-    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.3;
   }
-  .header {
+
+  .label-header {
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #000;
-    padding-bottom: 4px;
-    margin-bottom: 4px;
+    border-bottom: 1.5px solid #000;
+    padding-bottom: 6px;
   }
-  .brand-text {
+
+  .brand-logo {
+    width: 55px;
+    height: 55px;
+    object-fit: contain;
+    margin-right: 8px;
+  }
+
+  .parcel-meta {
     flex-grow: 1;
   }
-  .brand-text h3 {
+
+  .parcel-meta h3 {
     margin: 0;
-    font-size: 12px;
-    font-weight: bold;
-    color: #000;
+    font-size: 13px;
+    color: var(--primary);
+    text-transform: uppercase;
   }
-  .brand-text p {
-    margin: 1px 0;
-    font-size: 9.5px;
+
+  .parcel-meta p {
+    margin: 2px 0;
+    font-size: 10.5px;
   }
+
   .to-details {
     border-bottom: 1px solid #000;
-    padding-bottom: 4px;
-    margin-bottom: 4px;
+    padding: 6px 0;
   }
-  .code {
+
+  .code-tag {
+    float: right;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 13px;
+    color: var(--primary);
   }
+
   .cust-name {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: bold;
     text-transform: uppercase;
-    margin: 2px 0;
   }
-  .address {
-    font-size: 9.5px;
+
+  .cust-address {
     text-transform: uppercase;
+    font-size: 10px;
+    margin: 3px 0;
   }
-  .mobile {
-    font-size: 11px;
-    font-weight: bold;
-    margin-top: 2px;
-  }
+
   .from-details {
-    font-size: 9px;
-  }
-  .from-title {
-    font-weight: bold;
+    font-size: 9.5px;
+    background: #f9f9f9;
+    padding: 4px;
+    border-radius: 4px;
   }
 
   @media print {
-    html, body {
-      width: 210mm;
-      height: 297mm;
+    .no-print {
+      display: none !important;
     }
-    .grid-container {
+    body {
+      background: #fff;
+    }
+    .print-area {
       width: 100%;
       height: 100vh;
-      padding: 0;
+      page-break-after: always;
     }
   }
 </style>
 </head>
 <body>
 
-<div class="grid-container">
-
-  <!-- Label 1 -->
-  <div class="label-box">
-    <div class="header">
-      <div class="brand-text">
-        <h3>VITI CARE AYURVEDA - VP PARCEL</h3>
-        <p><strong>VP AMOUNT: 1500</strong> (ONE THOUSAND FIVE HUNDRED ONLY)</p>
-        <p>Weight: 300 gms | Helpline: +918282003938</p>
-      </div>
-    </div>
-    <div class="to-details">
-      <div class="code">(VK014)</div>
-      <div><strong>TO:</strong></div>
-      <div class="cust-name">MANNAT THAPA</div>
-      <div class="address">
-        D/O SANJEEV THAPA, VILL+ POST- BISHNUPUR- 786188<br>
-        NR- GAITRIMANDIR DIST- TINSUKIA, ASSAM
-      </div>
-      <div class="mobile">MOB: 8638265859</div>
-    </div>
-    <div class="from-details">
-      <div><strong>Product:</strong> SKIN CARE MEDICINE</div>
-      <div class="from-title">FROM: PRADIP KUMAR YADAV</div>
-      <div>15/2/1, NASKARHAT ROAD, GANESH BARI, KOLKATA 700039</div>
-      <div>PINCODE-700039, Mob No.- +918282003938</div>
-    </div>
+<div class="no-print">
+  <div class="header-banner">
+    <h1>Viti Care Ayurveda - New Parcel Entry</h1>
+    <button onclick="window.print()">Print Selected Labels (4-in-1)</button>
   </div>
-
-  <!-- Label 2 -->
-  <div class="label-box">
-    <div class="header">
-      <div class="brand-text">
-        <h3>VITI CARE AYURVEDA - VP COD PARCEL</h3>
-        <p><strong>VP AMOUNT: 1200</strong> (ONE THOUSAND TWO HUNDRED ONLY)</p>
-        <p>Weight: 300 gms | Helpline: +918282003938</p>
-      </div>
+  
+  <form id="parcelForm">
+    <div class="form-grid">
+      <input type="text" id="custCode" placeholder="Code (e.g. VK014)" required>
+      <input type="text" id="custName" placeholder="Customer Name" required>
+      <input type="text" id="custMobile" placeholder="Mobile Number" required>
+      <input type="text" id="custAddress" placeholder="Full Address" required>
+      <input type="number" id="vpAmount" placeholder="VP Amount (₹)" required>
+      <select id="parcelType">
+        <option value="VP COD PARCEL">VP COD PARCEL</option>
+        <option value="PREPAID PARCEL">PREPAID PARCEL</option>
+      </select>
     </div>
-    <div class="to-details">
-      <div class="code">(VK016)</div>
-      <div><strong>TO:</strong></div>
-      <div class="cust-name">VAISHNAVI KUMARI</div>
-      <div class="address">
-        D/O SARVESH RATHORE, VILL- FHATA, NEAR- HANUMAN MANDIR<br>
-        POST- NAWA TEHRA 205261, DIST- MAINPURI, UTTAR PRADESH
-      </div>
-      <div class="mobile">MOB: 8859371034</div>
-    </div>
-    <div class="from-details">
-      <div><strong>Product:</strong> SKIN CARE MEDICINE</div>
-      <div class="from-title">FROM: PRADIP KUMAR YADAV</div>
-      <div>15/2/1, NASKARHAT ROAD, GANESH BARI, KOLKATA 700039</div>
-      <div>PINCODE-700039, Mob No.- +918282003938</div>
-    </div>
-  </div>
-
-  <!-- Label 3 -->
-  <div class="label-box">
-    <div class="header">
-      <div class="brand-text">
-        <h3>VITI CARE AYURVEDA - VP COD PARCEL</h3>
-        <p><strong>VP AMOUNT: 1200</strong> (ONE THOUSAND TWO HUNDRED ONLY)</p>
-        <p>Weight: 300 gms | Helpline: +918282003938</p>
-      </div>
-    </div>
-    <div class="to-details">
-      <div class="code">(VK017)</div>
-      <div><strong>TO:</strong></div>
-      <div class="cust-name">SUNDAN KUMAR</div>
-      <div class="address">
-        S/O LAXMAN JHA, PPWD COLONY, TYEP 2, UNAICHAK<br>
-        POST- L.B.S NAGAR 800023, DIST- PATNA, BIHAR
-      </div>
-      <div class="mobile">MOB: 7808749762</div>
-    </div>
-    <div class="from-details">
-      <div><strong>Product:</strong> SKIN CARE MEDICINE</div>
-      <div class="from-title">FROM: PRADIP KUMAR YADAV</div>
-      <div>15/2/1, NASKARHAT ROAD, GANESH BARI, KOLKATA 700039</div>
-      <div>PINCODE-700039, Mob No.- +918282003938</div>
-    </div>
-  </div>
-
-  <!-- Label 4 -->
-  <div class="label-box">
-    <div class="header">
-      <div class="brand-text">
-        <h3>VITI CARE AYURVEDA - VP COD PARCEL</h3>
-        <p><strong>VP AMOUNT: 1200</strong> (ONE THOUSAND TWO HUNDRED ONLY)</p>
-        <p>Weight: 300 gms | Helpline: +918282003938</p>
-      </div>
-    </div>
-    <div class="to-details">
-      <div class="code">(VK018)</div>
-      <div><strong>TO:</strong></div>
-      <div class="cust-name">PRITHAVI SINGH</div>
-      <div class="address">
-        S/O PHOOL SINGH, VILL- JATULA, NEAR- HANUMAN MANDIR<br>
-        POST- MOKALWAS 332705, DIST- SIKAR, RAJASTHAN
-      </div>
-      <div class="mobile">MOB: 9887183008 / 9998738961</div>
-    </div>
-    <div class="from-details">
-      <div><strong>Product:</strong> SKIN CARE MEDICINE</div>
-      <div class="from-title">FROM: PRADIP KUMAR YADAV</div>
-      <div>15/2/1, NASKARHAT ROAD, GANESH BARI, KOLKATA 700039</div>
-      <div>PINCODE-700039, Mob No.- +918282003938</div>
-    </div>
-  </div>
-
+    <button type="submit">Add Label to Queue</button>
+  </form>
 </div>
+
+<!-- Print Container (4 Labels Grid) -->
+<div class="print-area" id="printArea">
+  <!-- Dynamic labels generated via JavaScript or 4 default placeholders -->
+</div>
+
+<script>
+  // Dynamic Label Rendering Logic
+  const sampleData = [
+    { code: "VK014", name: "MANNAT THAPA", mobile: "8638265859", address: "D/O SANJEEV THAPA, VILL+ POST- BISHNUPUR- 786188, NR- GAITRIMANDIR DIST- TINSUKIA, ASSAM", amount: "1500", type: "VP COD PARCEL" },
+    { code: "VK016", name: "VAISHNAVI KUMARI", mobile: "8859371034", address: "D/O SARVESH RATHORE, VILL- FHATA, NEAR- HANUMAN MANDIR, POST- NAWA TEHRA 205261, DIST- MAINPURI, UTTAR PRADESH", amount: "1200", type: "VP COD PARCEL" },
+    { code: "VK017", name: "SUNDAN KUMAR", mobile: "7808749762", address: "S/O LAXMAN JHA, PPWD COLONY, TYEP 2, UNAICHAK, POST- L.B.S NAGAR 800023, DIST- PATNA, BIHAR", amount: "1200", type: "VP COD PARCEL" },
+    { code: "VK018", name: "PRITHAVI SINGH", mobile: "9887183008", address: "S/O PHOOL SINGH, VILL- JATULA, NEAR- HANUMAN MANDIR, POST- MOKALWAS 332705, DIST- SIKAR, RAJASTHAN", amount: "1200", type: "VP COD PARCEL" }
+  ];
+
+  function renderLabels(items) {
+    const container = document.getElementById("printArea");
+    container.innerHTML = "";
+    items.slice(0, 4).forEach(item => {
+      container.innerHTML += `
+        <div class="label-box">
+          <div class="label-header">
+            <svg class="brand-logo" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#0F5243" stroke-width="3"/>
+              <circle cx="50" cy="50" r="38" fill="none" stroke="#50825B" stroke-width="1.5" stroke-dasharray="3,3"/>
+              <path d="M50 20 C30 40 35 65 50 80 C65 65 70 40 50 20 Z" fill="#50825B" opacity="0.3"/>
+              <path d="M50 30 C38 45 42 60 50 70 C58 60 62 45 50 30 Z" fill="#0F5243"/>
+            </svg>
+            <div class="parcel-meta">
+              <h3>VITI CARE AYURVEDA</h3>
+              <p><strong>${item.type}</strong></p>
+              <p><strong>VP AMOUNT: ₹${item.amount}</strong> | Weight: 300 gms</p>
+            </div>
+          </div>
+          <div class="to-details">
+            <span class="code-tag">(${item.code})</span>
+            <div><strong>TO:</strong></div>
+            <div class="cust-name">${item.name}</div>
+            <div class="cust-address">${item.address}</div>
+            <div><strong>MOB: ${item.mobile}</strong></div>
+          </div>
+          <div class="from-details">
+            <div><strong>Product:</strong> SKIN CARE MEDICINE</div>
+            <div><strong>FROM:</strong> PRADIP KUMAR YADAV, 15/2/1, NASKARHAT ROAD, GANESH BARI, KOLKATA 700039</div>
+            <div><strong>Helpline:</strong> +918282003938 | PINCODE: 700039</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  // Initial Render
+  renderLabels(sampleData);
+</script>
 
 </body>
 </html>
