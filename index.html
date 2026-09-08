@@ -3,591 +3,423 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viti Care Ayurveda - Professional Shipping & Admin System</title>
+  <title>Viti Care Ayurveda - Dispatch & Admin System</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // Viti Care Ayurveda Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDg16jOMt10Ma0IW1gwtYSpUtirJmmdJXU",
+      authDomain: "viti-care-ayurveda.firebaseapp.com",
+      databaseURL: "https://viti-care-ayurveda-default-rtdb.firebaseio.com",
+      projectId: "viti-care-ayurveda",
+      storageBucket: "viti-care-ayurveda.firebasestorage.app",
+      messagingSenderId: "934664789541",
+      appId: "1:934664789541:web:9c4bf29a6e1dc285e6cb4a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+  </script>
+
   <style>
+    :root {
+      --primary: #1e3a8a;
+      --bg-light: #f8fafc;
+      --border-color: #cbd5e1;
+      --text-dark: #0f172a;
+      --admin-color: #b91c1c;
+    }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-light); color: var(--text-dark); padding: 20px; }
+    .app-container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 24px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+    .brand-title h1 { font-size: 22px; color: var(--primary); font-weight: 700; }
+    .brand-title p { font-size: 13px; color: #64748b; }
+    .auth-controls { display: flex; align-items: center; gap: 12px; }
+    .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; background: #e2e8f0; color: #475569; }
+    .status-badge.admin { background: #fee2e2; color: #991b1b; }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+    .tab-btn { padding: 8px 16px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 6px; }
+    .tab-btn.active { background: var(--primary); color: #fff; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase; }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
+    .full-width { grid-column: 1 / -1; }
+    .btn { padding: 10px 18px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-admin { background: var(--admin-color); color: #fff; }
+    .btn-secondary { background: #e2e8f0; color: #1e293b; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .search-box { flex: 1; min-width: 250px; }
+    .search-box input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; }
+    .table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); }
+    th { background: #f1f5f9; font-weight: 700; color: #334155; }
+    .admin-only-cell { display: none; }
+    body.admin-mode .admin-only-cell { display: table-cell; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    .modal { background: #fff; padding: 24px; border-radius: 8px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .modal input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-size: 16px; letter-spacing: 4px; }
+    #printable-grid { display: none; }
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
-<script>
-  // Viti Care Ayurveda Configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyDgl6joMt10Ma0IW1gwtYSpUtirJmmdJXU",
-    authDomain: "viti-care-ayurveda.firebaseapp.com",
-    databaseURL: "https://viti-care-ayurveda-default-rtdb.firebaseio.com",
-    projectId: "viti-care-ayurveda",
-    storageBucket: "viti-care-ayurveda.firebasestorage.app",
-    messagingSenderId: "934664789541",
-    appId: "1:934664789541:web:96506bf8c7ddbf58a4e9cc"
-  };
-
-  // Initialize Firebase & Database
-  firebase.initializeApp(firebaseConfig);
-  const database = firebase.database();
-</script>
-    :root { --primary: #114B3e; --secondary: #217355; --bg: #f4f7f6; }
-    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background: var(--bg); margin: 0; padding: 10px; color: #333; }
-    
-    .app-header { background: white; border-radius: 12px; padding: 12px 18px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
-    
-    .nav-bar { display: flex; gap: 8px; margin-bottom: 15px; }
-    .nav-btn { flex: 1; padding: 12px; border: none; background: #e2e8f0; border-radius: 8px; font-weight: bold; cursor: pointer; color: #475569; font-size: 14px; transition: 0.3s; }
-    .nav-btn.active { background: var(--primary); color: white; }
-
-    .card { background: white; border-radius: 12px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
-    
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-    @media (max-width: 600px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-
-    label { font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; text-transform: uppercase; }
-    input, select, textarea { width: 100%; padding: 9px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-size: 13px; margin-bottom: 8px; }
-    
-    .btn { width: 100%; padding: 11px; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
-    .btn-success { background: #16a34a; color: white; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-danger { background: #dc2626; color: white; padding: 5px 8px; font-size: 11px; border-radius: 4px; border:none; cursor:pointer; }
-    .btn-edit { background: #d97706; color: white; padding: 5px 8px; font-size: 11px; border-radius: 4px; border:none; cursor:pointer; margin-right:4px; }
-
-    /* Records Table */
-    .table-container { overflow-x: auto; margin-top: 10px; }
-    table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-    th, td { border-bottom: 1px solid #e2e8f0; padding: 8px; }
-    th { background: #f8fafc; color: #334155; }
-
-   /* SHIPROCKET STYLE 4-IN-1 GRID PRINT SETUP */
-@page {
-  size: A4 portrait;
-  margin: 3mm;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  background: #fff;
-}
-
-/* 2x2 Printable Layout Container */
-.print-grid-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 135mm 135mm;
-  gap: 3mm;
-  width: 200mm;
-  height: 275mm;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-.ship-label-container {
-  width: 100%;
-  height: 135mm;
-  background: white;
-  border: 1.5px solid #000;
-  padding: 6px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  font-size: 10px;
-  line-height: 1.2;
-}
-
-@media print {
-  .no-print, .form-container, .table-container, button {
-    display: none !important;
-  }
-  body {
-    background: white;
-  }
-  .print-grid-container {
-    width: 100%;
-    height: 100vh;
-    page-break-after: always;
-  }
-} 
-      .ship-label-container { page-break-inside: avoid; page-break-after: always; }
+    @media print {
+      @page { size: A4 portrait; margin: 5mm; }
+      body * { visibility: hidden !important; }
+      #printable-grid, #printable-grid * { visibility: visible !important; }
+      #printable-grid { display: grid !important; grid-template-columns: 1fr 1fr; grid-template-rows: 135mm 135mm; gap: 5mm; width: 200mm; height: 277mm; position: absolute; top: 0; left: 0; background: #fff; }
+      .exact-ship-label { border: 2px solid #000; padding: 8px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; font-family: Arial, sans-serif; height: 135mm; overflow: hidden; }
+      .label-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1.5px solid #000; padding-bottom: 6px; }
+      .amount-box { text-align: right; }
+      .amount-title { font-size: 12px; font-weight: 900; }
+      .amount-val { font-size: 13px; font-weight: 900; }
+      .amount-words { font-size: 8px; font-weight: bold; text-transform: uppercase; }
+      .to-section { border-bottom: 1.5px solid #000; padding: 6px 0; flex-grow: 1; }
+      .patient-name { font-size: 13px; font-weight: 900; text-transform: uppercase; margin: 2px 0; }
+      .patient-address { font-size: 10px; line-height: 1.25; text-transform: uppercase; margin-top: 3px; }
+      .patient-phone { font-size: 12px; font-weight: 900; margin-top: 4px; }
+      .from-section { padding-top: 6px; font-size: 9px; line-height: 1.2; text-transform: uppercase; }
     }
   </style>
 </head>
-<body>
+<body class="staff-mode">
 
-<div class="app-header">
-  <div style="text-align: left;">
-    <span style="font-weight: 800; color: var(--primary); font-size: 18px;">VITI CARE AYURVEDA</span>
-    <div style="font-size: 11px; color: #64748b;">Smart Shipping & Dispatch Management</div>
-  </div>
-  <button id="lockBtn" type="button" style="background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; font-weight: bold;">🔒 Admin Access</button>
-</div>
-
-<div class="nav-bar">
-  <button type="button" class="nav-btn active" id="tab1">📦 New Booking Entry</button>
-  <button type="button" class="nav-btn" id="tab2">📋 Patient Records & Labels</button>
-</div>
-
-<!-- SECTION 1: BOOKING ENTRY / EDIT FORM -->
-<div id="entrySec" class="card">
-  <h3 id="formTitle" style="margin-top:0; color: var(--primary); font-size: 15px;">New Parcel Booking</h3>
-  <form id="orderForm">
-    <input type="hidden" id="editRecordId" value="">
-    
-    <div class="grid-2">
-      <div>
-        <label>Payment Type *</label>
-        <select id="payType" required>
-          <option value="COD">COD</option>
-          <option value="Prepaid">Prepaid</option>
-        </select>
+  <div class="app-container">
+    <header>
+      <div class="brand-title">
+        <h1>VITI CARE AYURVEDA</h1>
+        <p>Dispatch & 4-in-1 Label Printing Management System</p>
       </div>
-      <div>
-        <label>Order Total Amount (₹) *</label>
-        <input type="number" id="payAmount" placeholder="1200" required>
+      <div class="auth-controls">
+        <span id="role-badge" class="status-badge">Staff Access</span>
+        <button id="admin-toggle-btn" class="btn btn-secondary" onclick="openAdminModal()">Unlock Admin</button>
       </div>
+    </header>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('booking-tab', this)">New Parcel Booking</button>
+      <button class="tab-btn" onclick="switchTab('records-tab', this)">Patient Records & Labels</button>
     </div>
 
-    <div class="grid-2">
-      <div>
-        <label>Ship To (Patient Name) *</label>
-        <input type="text" id="patientName" placeholder="sanjay kumar bind" required>
-      </div>
-      <div>
-        <label>C/O or S/O Name *</label>
-        <input type="text" id="careOf" placeholder="MAHENDRA PRASAD BIND">
-      </div>
+    <!-- TAB 1: Booking Form -->
+    <div id="booking-tab" class="tab-content">
+      <form id="parcel-form" onsubmit="handleFormSubmit(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Payment Type *</label>
+            <select id="paymentType" required>
+              <option value="COD">VP COD PARCEL</option>
+              <option value="PREPAID">PREPAID PARCEL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Order Amount (₹) *</label>
+            <input type="number" id="orderAmount" value="1500" required>
+          </div>
+          <div class="form-group">
+            <label>Parcel Weight *</label>
+            <input type="text" id="parcelWeight" value="300 gms" required>
+          </div>
+          <div class="form-group">
+            <label>Patient Name *</label>
+            <input type="text" id="patientName" placeholder="RAMGOPAL KUSHWAHA" required>
+          </div>
+          <div class="form-group">
+            <label>C/O or S/O Name</label>
+            <input type="text" id="coName" placeholder="C/O - SHIV PRASAD KUSHWAHA">
+          </div>
+          <div class="form-group">
+            <label>Mobile Number *</label>
+            <input type="text" id="mobileNo" placeholder="9755559343" required>
+          </div>
+          <div class="form-group full-width">
+            <label>Full Delivery Address / Village / Locality *</label>
+            <textarea id="fullAddress" rows="2" placeholder="AT - TARONKALA, POST - TAEONKALA" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>District & State *</label>
+            <input type="text" id="districtState" placeholder="HOSHANGABAD, MADHYA PRADESH" required>
+          </div>
+          <div class="form-group">
+            <label>PIN Code *</label>
+            <input type="text" id="pincode" placeholder="461001" required>
+          </div>
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="productName" value="SKIN CARE MEDICINE">
+          </div>
+          <div class="form-group">
+            <label>Remarks</label>
+            <input type="text" id="remarks" value="URGENT MEDICINE">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Parcel to Firebase</button>
+      </form>
     </div>
 
-    <div>
-      <label>Full Address / Village / Locality *</label>
-      <textarea id="fullAddress" rows="2" placeholder="saura Bind Basti , P.o - Aurai , Near Shiv Mandir shiv Mandir" required></textarea>
-    </div>
+    <!-- TAB 2: Patient Records & Print Table -->
+    <div id="records-tab" class="tab-content" style="display: none;">
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="searchInput" oninput="filterRecords()" placeholder="🔍 Search Patient Name, Mobile, AWB, Address, PIN...">
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="printSelectedGrid()">🖨️ Print Selected (4-in-1 A4)</button>
+          <button id="admin-export-btn" class="btn btn-secondary admin-only-cell" onclick="exportToCSV()" style="display:none;">📥 Export CSV</button>
+          <button id="admin-clear-btn" class="btn btn-danger admin-only-cell" onclick="clearAllData()" style="display:none;">🗑️ Clear Database</button>
+        </div>
+      </div>
 
-    <div class="grid-2">
-      <div>
-        <label>District & State *</label>
-        <input type="text" id="distState" placeholder="Sant Ravidas Nagar,Uttar Pradesh" required>
-      </div>
-      <div>
-        <label>PIN Code *</label>
-        <input type="text" id="pincode" placeholder="221301" required>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div>
-        <label>Mobile Number *</label>
-        <input type="text" id="mob1" placeholder="9955771853" required>
-      </div>
-      <div>
-        <label>Alternate Mobile</label>
-        <input type="text" id="mob2" placeholder="Alternate Mobile">
-      </div>
-    </div>
-
-    <div class="grid-3">
-      <div>
-        <label>Product Item Name *</label>
-        <input type="text" id="prodName" value="SKIN care medicine" required>
-      </div>
-      <div>
-        <label>SKU Code</label>
-        <input type="text" id="skuCode" value="S1IA000178...">
-      </div>
-      <div>
-        <label>Quantity *</label>
-        <input type="number" id="prodQty" value="1" required>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
+              <th>Date</th>
+              <th>Order / AWB</th>
+              <th>Patient Details</th>
+              <th>Mobile</th>
+              <th>Amount</th>
+              <th>Address</th>
+              <th class="admin-only-cell">Action</th>
+            </tr>
+          </thead>
+          <tbody id="recordsTableBody"></tbody>
+        </table>
       </div>
     </div>
-
-    <div class="grid-3">
-      <div>
-        <label>Weight (kg) *</label>
-        <input type="text" id="prodWeight" value="0.5 kg" required>
-      </div>
-      <div>
-        <label>Dimensions (LxBxH cm)</label>
-        <input type="text" id="prodDim" value="15x12x7">
-      </div>
-      <div>
-        <label>Courier Service Name</label>
-        <input type="text" id="courierName" value="Xpressbees Surface">
-      </div>
-    </div>
-
-    <div class="grid-3">
-      <div>
-        <label>Order # / Invoice No.</label>
-        <input type="text" id="orderNo" placeholder="2930928074">
-      </div>
-      <div>
-        <label>AWB Tracking No.</label>
-        <input type="text" id="awbNo" placeholder="14112367174725">
-      </div>
-      <div>
-        <label>Invoice Date *</label>
-        <input type="date" id="dispDate" required>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:10px; margin-top: 10px;">
-      <button type="submit" id="saveBtn" class="btn btn-success">💾 Save Record & Generate Label</button>
-      <button type="button" id="cancelEditBtn" class="btn" style="background:#64748b; color:white; display:none; width:150px;">Cancel Edit</button>
-    </div>
-  </form>
-</div>
-
-<!-- SECTION 2: RECORDS & LABELS -->
-<div id="recordsSec" class="card" style="display: none;">
-  <input type="text" id="searchBox" placeholder="🔍 Search Patient Name, Mobile No, Address, PIN, AWB, or Date..." style="border: 2px solid var(--primary);">
-
-  <div style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; flex-wrap: wrap; gap:10px;">
-    <button type="button" id="printSelectedBtn" class="btn btn-primary" style="width: auto; padding: 8px 16px; font-size: 13px;">🖨️ Print Selected Labels (Shiprocket Style)</button>
-    <div id="adminStats" style="display:none; font-size: 12px; font-weight: bold; color: var(--primary);"></div>
   </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAllCb"></th>
-          <th>Date</th>
-          <th>Order # / AWB</th>
-          <th>Patient Details</th>
-          <th>Mobile</th>
-          <th>Address & PIN</th>
-          <th>Amount</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="recordRows"></tbody>
-    </table>
+  <div id="printable-grid"></div>
+
+  <!-- Admin PIN Modal -->
+  <div id="adminModal" class="modal-overlay">
+    <div class="modal">
+      <h3>Enter Admin PIN</h3>
+      <input type="password" id="adminPinInput" maxlength="6" placeholder="****">
+      <div style="display: flex; justify-content: flex-end; gap: 8px;">
+        <button class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+        <button class="btn btn-admin" onclick="verifyAdminPin()">Unlock</button>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- PRINT CONTAINER -->
-<div id="printContainer" style="display:none;"></div>
+  <script>
+    let isAdmin = false;
+    const ADMIN_PIN = "8282";
+    let parcelRecords = [];
 
-<script>
-  let isAdmin = false;
-
-  document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('dispDate').valueAsDate = new Date();
-
-    // Event Listeners for Nav Buttons
-    document.getElementById('tab1').addEventListener('click', function() { switchTab('entry'); });
-    document.getElementById('tab2').addEventListener('click', function() { switchTab('records'); });
-    document.getElementById('lockBtn').addEventListener('click', toggleAdminLock);
-    document.getElementById('orderForm').addEventListener('submit', handleFormSubmit);
-    document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
-    document.getElementById('searchBox').addEventListener('keyup', renderTable);
-    document.getElementById('printSelectedBtn').addEventListener('click', printSelectedLabels);
-    document.getElementById('selectAllCb').addEventListener('click', function() { toggleSelectAll(this); });
-  });
-
-  function switchTab(tab) {
-    const entrySec = document.getElementById('entrySec');
-    const recordsSec = document.getElementById('recordsSec');
-    const tab1 = document.getElementById('tab1');
-    const tab2 = document.getElementById('tab2');
-
-    if(tab === 'records') {
-      entrySec.style.display = 'none';
-      recordsSec.style.display = 'block';
-      tab1.classList.remove('active');
-      tab2.classList.add('active');
-      renderTable();
-    } else {
-      entrySec.style.display = 'block';
-      recordsSec.style.display = 'none';
-      tab1.classList.add('active');
-      tab2.classList.remove('active');
-    }
-  }
-
-  function toggleAdminLock() {
-    if(!isAdmin) {
-      let pwd = prompt("Enter Admin Password:");
-      if(pwd === "828200") {
-        isAdmin = true;
-        document.getElementById('lockBtn').innerHTML = "🔓 Admin Unlocked";
-        document.getElementById('lockBtn').style.background = "#dcfce7";
-        alert("Admin Access Unlocked!");
-        renderTable();
-      } else if(pwd !== null) {
-        alert("Incorrect Password!");
+    // Sync with Firebase Realtime Database
+    const parcelsRef = database.ref('parcels');
+    parcelsRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      parcelRecords = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          parcelRecords.push({ id: key, ...data[key] });
+        });
       }
-    } else {
-      isAdmin = false;
-      document.getElementById('lockBtn').innerHTML = "🔒 Admin Access";
-      document.getElementById('lockBtn').style.background = "#f1f5f9";
-      renderTable();
-    }
-  }
+      renderRecords(parcelRecords);
+    });
 
-  function handleFormSubmit(e) {
-    e.preventDefault();
-    const editId = document.getElementById('editRecordId').value;
-    let list = JSON.parse(localStorage.getItem('vitiCareShipDb') || '[]');
-
-    const data = {
-      id: editId ? Number(editId) : Date.now(),
-      payType: document.getElementById('payType').value,
-      payAmount: document.getElementById('payAmount').value,
-      name: document.getElementById('patientName').value.toLowerCase(),
-      careOf: document.getElementById('careOf').value,
-      address: document.getElementById('fullAddress').value,
-      distState: document.getElementById('distState').value,
-      pincode: document.getElementById('pincode').value,
-      mob1: document.getElementById('mob1').value,
-      mob2: document.getElementById('mob2').value,
-      prodName: document.getElementById('prodName').value,
-      skuCode: document.getElementById('skuCode').value,
-      prodQty: document.getElementById('prodQty').value,
-      weight: document.getElementById('prodWeight').value,
-      dimensions: document.getElementById('prodDim').value,
-      courier: document.getElementById('courierName').value,
-      orderNo: document.getElementById('orderNo').value || Math.floor(2000000000 + Math.random()*900000000).toString(),
-      awbNo: document.getElementById('awbNo').value || Math.floor(14000000000000 + Math.random()*900000000000).toString(),
-      date: document.getElementById('dispDate').value
-    };
-
-    if(editId) {
-      const idx = list.findIndex(i => i.id === Number(editId));
-      if(idx !== -1) list[idx] = data;
-      alert("Record Updated Successfully!");
-    } else {
-      list.unshift(data);
-      alert("New Order Saved Successfully!");
+    function numberToWords(num) {
+      const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+      const b = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+      if ((num = num.toString()).length > 9) return 'overflow';
+      let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+      if (!n) return ''; 
+      let str = '';
+      str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+      str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+      str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+      str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+      str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+      return str.trim() + ' ONLY';
     }
 
-    localStorage.setItem('vitiCareShipDb', JSON.stringify(list));
-    resetForm();
-    switchTab('records');
-  }
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).style.display = 'block';
+      btn.classList.add('active');
+    }
 
-  function resetForm() {
-    document.getElementById('editRecordId').value = '';
-    document.getElementById('orderForm').reset();
-    document.getElementById('dispDate').valueAsDate = new Date();
-    document.getElementById('formTitle').innerText = "New Parcel Booking";
-    document.getElementById('saveBtn').innerText = "💾 Save Record & Generate Label";
-    document.getElementById('cancelEditBtn').style.display = 'none';
-  }
+    function openAdminModal() {
+      if(isAdmin) {
+        isAdmin = false;
+        document.body.classList.remove('admin-mode');
+        document.getElementById('role-badge').innerText = "Staff Access";
+        document.getElementById('role-badge').classList.remove('admin');
+        document.getElementById('admin-toggle-btn').innerText = "Unlock Admin";
+        document.querySelectorAll('.admin-only-cell').forEach(el => el.style.display = 'none');
+        renderRecords(parcelRecords);
+      } else {
+        document.getElementById('adminModal').style.display = 'flex';
+        document.getElementById('adminPinInput').focus();
+      }
+    }
 
-  function editRecord(id) {
-    const list = JSON.parse(localStorage.getItem('vitiCareShipDb') || '[]');
-    const item = list.find(i => i.id === id);
-    if(!item) return;
+    function closeAdminModal() {
+      document.getElementById('adminModal').style.display = 'none';
+      document.getElementById('adminPinInput').value = '';
+    }
 
-    document.getElementById('editRecordId').value = item.id;
-    document.getElementById('payType').value = item.payType;
-    document.getElementById('payAmount').value = item.payAmount;
-    document.getElementById('patientName').value = item.name;
-    document.getElementById('careOf').value = item.careOf || '';
-    document.getElementById('fullAddress').value = item.address;
-    document.getElementById('distState').value = item.distState;
-    document.getElementById('pincode').value = item.pincode;
-    document.getElementById('mob1').value = item.mob1;
-    document.getElementById('mob2').value = item.mob2 || '';
-    document.getElementById('prodName').value = item.prodName;
-    document.getElementById('skuCode').value = item.skuCode || '';
-    document.getElementById('prodQty').value = item.prodQty || 1;
-    document.getElementById('prodWeight').value = item.weight;
-    document.getElementById('prodDim').value = item.dimensions || '15x12x7';
-    document.getElementById('courierName').value = item.courier || 'Xpressbees Surface';
-    document.getElementById('orderNo').value = item.orderNo;
-    document.getElementById('awbNo').value = item.awbNo;
-    document.getElementById('dispDate').value = item.date;
+    function verifyAdminPin() {
+      if (document.getElementById('adminPinInput').value === ADMIN_PIN) {
+        isAdmin = true;
+        document.body.classList.add('admin-mode');
+        document.getElementById('role-badge').innerText = "Admin Access (Unlocked)";
+        document.getElementById('role-badge').classList.add('admin');
+        document.getElementById('admin-toggle-btn').innerText = "Lock Admin";
+        document.querySelectorAll('.admin-only-cell').forEach(el => el.style.display = 'table-cell');
+        closeAdminModal();
+        renderRecords(parcelRecords);
+      } else {
+        alert("Incorrect PIN! Default Admin PIN is 8282");
+      }
+    }
 
-    document.getElementById('formTitle').innerText = "✏️ Edit Parcel Record";
-    document.getElementById('saveBtn').innerText = "🔄 Update Record";
-    document.getElementById('cancelEditBtn').style.display = 'block';
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      const newRecord = {
+        date: new Date().toISOString().split('T')[0],
+        orderNo: "VK-" + Math.floor(100 + Math.random() * 900),
+        awb: "14" + Math.floor(100000000000 + Math.random() * 900000000000),
+        paymentType: document.getElementById('paymentType').value,
+        amount: parseFloat(document.getElementById('orderAmount').value),
+        weight: document.getElementById('parcelWeight').value,
+        patientName: document.getElementById('patientName').value.toUpperCase(),
+        coName: document.getElementById('coName').value.toUpperCase(),
+        mobile: document.getElementById('mobileNo').value,
+        address: document.getElementById('fullAddress').value.toUpperCase(),
+        districtState: document.getElementById('districtState').value.toUpperCase(),
+        pincode: document.getElementById('pincode').value,
+        product: document.getElementById('productName').value.toUpperCase(),
+        remarks: document.getElementById('remarks').value.toUpperCase(),
+        from: "PRADIP KUMAR YADAV, AT - 2 NO. TILJALA ROAD, KOLKATA, PINCODE - 700039, Mob No. - +918282003938"
+      };
 
-    switchTab('entry');
-  }
+      parcelsRef.push(newRecord);
+      document.getElementById('parcel-form').reset();
+      alert("Parcel Saved to Cloud Database!");
+      switchTab('records-tab', document.querySelectorAll('.tab-btn')[1]);
+    }
 
-  function renderTable() {
-    const list = JSON.parse(localStorage.getItem('vitiCareShipDb') || '[]');
-    const query = document.getElementById('searchBox').value.toLowerCase();
-    const tbody = document.getElementById('recordRows');
-    tbody.innerHTML = '';
-
-    let totalRev = 0;
-    let count = 0;
-
-    list.forEach(item => {
-      const matchText = `${item.name} ${item.mob1} ${item.mob2} ${item.address} ${item.pincode} ${item.date} ${item.orderNo} ${item.awbNo}`.toLowerCase();
-      if(matchText.includes(query)) {
-        count++;
-        totalRev += Number(item.payAmount || 0);
-
+    function renderRecords(data) {
+      const tbody = document.getElementById('recordsTableBody');
+      tbody.innerHTML = '';
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px;">No records found.</td></tr>`;
+        return;
+      }
+      data.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><input type="checkbox" class="rec-select" value="${item.id}"></td>
+          <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
           <td>${item.date}</td>
-          <td><b>Order#:</b> ${item.orderNo}<br><small>AWB: ${item.awbNo}</small></td>
-          <td><b>${item.name}</b> ${item.careOf ? '<br><small>C/O: '+item.careOf+'</small>' : ''}</td>
-          <td>${item.mob1} ${item.mob2 ? '<br>'+item.mob2 : ''}</td>
-          <td>${item.address}, ${item.distState} - <b>${item.pincode}</b></td>
-          <td><b>${item.payType}</b><br>₹ ${item.payAmount}</td>
-          <td>
-            ${isAdmin ? `<button type="button" class="btn-edit" onclick="editRecord(${item.id})">✏️ Edit</button><button type="button" class="btn-danger" onclick="deleteRecord(${item.id})">Delete</button>` : `<button type="button" class="btn-edit" onclick="printSingle(${item.id})">🖨️ Label</button>`}
+          <td><strong>${item.orderNo}</strong><br><small>AWB: ${item.awb}</small></td>
+          <td><strong>${item.patientName}</strong><br><small>${item.coName || ''}</small></td>
+          <td>${item.mobile}</td>
+          <td><strong>₹${item.amount}</strong> (${item.paymentType})</td>
+          <td>${item.address}, ${item.districtState} - ${item.pincode}</td>
+          <td class="admin-only-cell" style="${isAdmin ? 'display:table-cell;' : 'display:none;'}">
+            <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteRecord('${item.id}')">Delete</button>
           </td>
         `;
         tbody.appendChild(tr);
+      });
+    }
+
+    function filterRecords() {
+      const q = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = parcelRecords.filter(r => 
+        r.patientName.toLowerCase().includes(q) ||
+        r.mobile.includes(q) ||
+        r.awb.includes(q) ||
+        r.orderNo.toLowerCase().includes(q) ||
+        r.address.toLowerCase().includes(q)
+      );
+      renderRecords(filtered);
+    }
+
+    function toggleSelectAll(master) {
+      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
+    }
+
+    function deleteRecord(id) {
+      if (!isAdmin) return;
+      if (confirm("Are you sure you want to delete this parcel record from cloud?")) {
+        database.ref('parcels/' + id).remove();
       }
-    });
-
-    if(isAdmin) {
-      document.getElementById('adminStats').style.display = 'block';
-      document.getElementById('adminStats').innerHTML = `Total Orders: ${count} | Total Sales: ₹ ${totalRev}`;
-    } else {
-      document.getElementById('adminStats').style.display = 'none';
-    }
-  }
-
-  function toggleSelectAll(master) {
-    document.querySelectorAll('.rec-select').forEach(cb => cb.checked = master.checked);
-  }
-
-  function deleteRecord(id) {
-    if(confirm("Are you sure you want to delete this record?")) {
-      let list = JSON.parse(localStorage.getItem('vitiCareShipDb') || '[]');
-      list = list.filter(i => i.id !== id);
-      localStorage.setItem('vitiCareShipDb', JSON.stringify(list));
-      renderTable();
-    }
-  }
-
-  function printSingle(id) {
-    document.querySelectorAll('.rec-select').forEach(cb => cb.checked = (Number(cb.value) === id));
-    printSelectedLabels();
-  }
-
-  function printSelectedLabels() {
-    const selectedIds = Array.from(document.querySelectorAll('.rec-select:checked')).map(cb => Number(cb.value));
-    if(selectedIds.length === 0) {
-      alert("Please select at least 1 record to print label!");
-      return;
     }
 
-    const list = JSON.parse(localStorage.getItem('vitiCareShipDb') || '[]');
-    const selectedData = list.filter(item => selectedIds.includes(item.id));
+    function clearAllData() {
+      if (!isAdmin) return;
+      if (confirm("WARNING: This will permanently delete ALL parcel records from Cloud Database!")) {
+        parcelsRef.remove();
+      }
+    }
 
-    let htmlOutput = '';
+    function exportToCSV() {
+      if (!isAdmin) return;
+      let csv = "Date,OrderNo,AWB,PaymentType,Amount,Weight,PatientName,CoName,Mobile,Address,DistrictState,PIN\n";
+      parcelRecords.forEach(r => {
+        csv += `"${r.date}","${r.orderNo}","${r.awb}","${r.paymentType}","${r.amount}","${r.weight}","${r.patientName}","${r.coName}","${r.mobile}","${r.address}","${r.districtState}","${r.pincode}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = window.URL.createObjectURL(blob);
+      a.download = `Viti_Care_Parcels_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
 
-    selectedData.forEach(rec => {
-      htmlOutput += `
-        <div class="ship-label-container">
-          <div class="watermark-top">
-            <span>VITI CARE AYURVEDA</span><span>VITI CARE AYURVEDA</span><span>VITI CARE AYURVEDA</span>
+    function printSelectedGrid() {
+      const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
+      if (selectedBoxes.length === 0) {
+        alert("Kripya print karne ke liye kam se kam 1 record select karein.");
+        return;
+      }
+      if (selectedBoxes.length > 4) {
+        alert("Ek page par maximum 4 labels print ho sakte hain.");
+        return;
+      }
+      const selectedIds = Array.from(selectedBoxes).map(cb => cb.value);
+      const selectedItems = parcelRecords.filter(r => selectedIds.includes(r.id));
+      const printGrid = document.getElementById('printable-grid');
+      printGrid.innerHTML = '';
+
+      selectedItems.forEach(item => {
+        printGrid.innerHTML += `
+          <div class="exact-ship-label">
+            <div class="label-header">
+              <div class="brand-logo-text"><span style="font-size:12px; color:#2e7d32; font-weight:bold;">🌿 VITI CARE AYURVEDA</span></div>
+              <div class="amount-box">
+                <div class="amount-title">VP ${item.paymentType} PARCEL</div>
+                <div class="amount-val">VP AMOUNT- ${item.amount}</div>
+                <div class="amount-words">${numberToWords(item.amount)}</div>
+                <div style="font-size:9px;">Weight- ${item.weight}</div>
+              </div>
+            </div>
+            <div class="to-section">
+              <div style="font-weight:bold; font-size:11px;">To</div>
+              <div class="patient-name">${item.patientName}</div>
+              ${item.coName ? `<div style="font-size:10px; font-weight:bold;">${item.coName}</div>` : ''}
+              <div class="patient-address">${item.address}<br>DIST - ${item.districtState}<br>PINCODE - ${item.pincode}</div>
+              <div class="patient-phone">${item.mobile}</div>
+              <div style="font-size:9px; margin-top:4px;">Product: ${item.product || 'MEDICINE'}<br>Order #: ${item.orderNo}</div>
+            </div>
+            <div class="from-section"><strong>FROM -</strong><br>${item.from}</div>
           </div>
-          <div class="watermark-side watermark-left">VITI CARE AYURVEDA VITI CARE AYURVEDA</div>
-          <div class="watermark-side watermark-right">VITI CARE AYURVEDA VITI CARE AYURVEDA</div>
-          
-          <div class="outer-border-box">
-            <div class="label-section">
-              <div style="font-weight:bold; font-size:12px;">Ship To</div>
-              <div style="font-weight:bold; font-size:12px;">${rec.name}</div>
-              <div>${rec.address} ${rec.careOf ? ', C/O '+rec.careOf : ''}</div>
-              <div>${rec.distState}, India</div>
-              <div style="font-weight:bold;">${rec.pincode}</div>
-              <div style="font-weight:bold;">${rec.mob1}</div>
-            </div>
-
-            <div class="label-section" style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <div>Dimensions: ${rec.dimensions || '15x12x7'}</div>
-                <div>Payment: <b>${rec.payType}</b></div>
-                <div>Order Total: <b>₹${rec.payAmount}</b></div>
-                <div>Weight: ${rec.weight}</div>
-                <div>EWaybill No:</div>
-                <div>Routing code: N/S-19/2C/301</div>
-                <div>RTO Routing code: NA</div>
-              </div>
-              <div style="text-align:right;">
-                <div>${rec.courier || 'Xpressbees Surface'}</div>
-                <div><b>AWB#: ${rec.awbNo}</b></div>
-                <div class="fake-barcode" style="margin-top:4px;"></div>
-              </div>
-            </div>
-
-            <div class="label-section" style="display:flex; justify-content:space-between; align-items:flex-start;">
-              <div>
-                <div><b>Shipped By</b> <i>(if undelivered, return to)</i></div>
-                <div style="font-weight:bold;">PRADIP KUMAR YADAV </div>
-                <div>32, Kasba, Kolkata, Presidency Division, West Bengal - 700039 Ganesh bari</div>
-                <div>South 24 Parganas, West Bengal</div>
-                <div style="font-weight:bold;">700039</div>
-                <div>8282003938</div>
-                <div style="margin-top:4px;">Customer Care: 1800-123-4567</div>
-                <div>Customer Email: viticareayurveda@gmail.com</div>
-              </div>
-              <div style="text-align:right;">
-                <div><b>Order#: ${rec.orderNo}</b></div>
-                <div class="fake-barcode" style="margin-top:4px;"></div>
-                <div style="margin-top:4px;">Invoice No: Retail00002</div>
-                <div>Invoice Date: ${rec.date}</div>
-                <div>Order Date: ${rec.date}</div>
-                <div>GSTIN: 19AHXPY3167G1ZD</div>
-              </div>
-            </div>
-
-            <div class="label-section" style="padding-bottom:0;">
-              <table style="width:100%; border-collapse:collapse; font-size:10px;">
-                <thead>
-                  <tr style="border-bottom:1px solid #000;">
-                    <th style="text-align:left; padding:2px;">Item</th>
-                    <th style="text-align:center; padding:2px;">SKU</th>
-                    <th style="text-align:center; padding:2px;">Qty</th>
-                    <th style="text-align:right; padding:2px;">Price</th>
-                    <th style="text-align:center; padding:2px;">HSN</th>
-                    <th style="text-align:right; padding:2px;">Taxable Value</th>
-                    <th style="text-align:right; padding:2px;">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td style="padding:4px 2px;">${rec.prodName}</td>
-                    <td style="text-align:center;">${rec.skuCode || 'S1IA000178...'}</td>
-                    <td style="text-align:center;">${rec.prodQty || 1}</td>
-                    <td style="text-align:right;">₹${rec.payAmount}.00</td>
-                    <td style="text-align:center;">-</td>
-                    <td style="text-align:right;">₹${rec.payAmount}.00</td>
-                    <td style="text-align:right;">₹${rec.payAmount}.00</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:6px; border-top:1px solid #ddd; padding-top:4px;">
-                <div>Platform Fee: ₹0<br>Shipping Charges: ₹0</div>
-                <div style="text-align:right;">Discount: ₹0<br><b>Collectable Amount: ₹${rec.payAmount}</b></div>
-              </div>
-            </div>
-
-            <div style="font-size:8px; text-align:center; margin-top:4px;">
-              All disputes are subject to Jurisdiction only. Goods once sold will only be taken back or exchanged as per store's exchange and return policy.<br>
-              This is an auto generated label and does not require any signature.
-            </div>
-          </div>
-
-          <div class="watermark-bottom">
-            <span>VITI CARE AYURVEDA</span><span>VITI CARE AYURVEDA</span><span>VITI CARE AYURVEDA</span>
-          </div>
-        </div>
-      `;
-    });
-
-    const printContainer = document.getElementById('printContainer');
-    printContainer.style.display = 'block';
-    printContainer.innerHTML = htmlOutput;
-
-    window.print();
-    printContainer.style.display = 'none';
-  }
-</script>
-
+        `;
+      });
+      window.print();
+    }
+  </script>
 </body>
 </html>
