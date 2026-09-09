@@ -1,422 +1,324 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Viti Care Ayurveda - Dispatch & Admin System</title>
-  
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viti Care Ayurveda - Dispatch & Admin System</title>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDg16jOMt10Ma0IW1gwtYSpUtirJmmdJXU",
-      authDomain: "viti-care-ayurveda.firebaseapp.com",
-      databaseURL: "https://viti-care-ayurveda-default-rtdb.firebaseio.com",
-      projectId: "viti-care-ayurveda",
-      storageBucket: "viti-care-ayurveda.firebasestorage.app",
-      messagingSenderId: "934664789541",
-      appId: "1:934664789541:web:9c4bf29a6e1dc285e6cb4a"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-  </script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-  <style>
-    :root {
-      --primary: #1e3a8a;
-      --bg-light: #f8fafc;
-      --border-color: #cbd5e1;
-      --text-dark: #0f172a;
-      --admin-color: #b91c1c;
-    }
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDg16jOMt10Ma0IW1gwtYSpUtirJmmdJXU",
+  authDomain: "viti-care-ayurveda.firebaseapp.com",
+  databaseURL: "https://viti-care-ayurveda-default-rtdb.firebaseio.com",
+  projectId: "viti-care-ayurveda",
+  storageBucket: "viti-care-ayurveda.firebasestorage.app",
+  messagingSenderId: "934664789541",
+  appId: "1:934664789541:web:9c4bf29a6e1dc285e6cb4a"
+};
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+</script>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-light); color: var(--text-dark); padding: 20px; }
-    .app-container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 24px; }
-    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
-    .brand-title h1 { font-size: 22px; color: var(--primary); font-weight: 700; }
-    .brand-title p { font-size: 13px; color: #64748b; }
-    .auth-controls { display: flex; align-items: center; gap: 12px; }
-    .status-badge { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; background: #e2e8f0; color: #475569; }
-    .status-badge.admin { background: #fee2e2; color: #991b1b; }
-    .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-    .tab-btn { padding: 8px 16px; border: none; background: transparent; font-size: 14px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 6px; }
-    .tab-btn.active { background: var(--primary); color: #fff; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 12px; font-weight: 700; color: #334155; text-transform: uppercase; }
-    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; }
-    .full-width { grid-column: 1 / -1; }
-    .btn { padding: 10px 18px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
-    .btn-primary { background: var(--primary); color: #fff; }
-    .btn-admin { background: var(--admin-color); color: #fff; }
-    .btn-secondary { background: #e2e8f0; color: #1e293b; }
-    .btn-danger { background: #ef4444; color: #fff; }
-    .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-    .search-box { flex: 1; min-width: 250px; }
-    .search-box input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 6px; }
-    .table-container { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; }
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border-color); }
-    th { background: #f1f5f9; font-weight: 700; color: #334155; }
-    .admin-only-cell { display: none; }
-    body.admin-mode .admin-only-cell { display: table-cell; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
-    .modal { background: #fff; padding: 24px; border-radius: 8px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .modal input { width: 100%; padding: 10px; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: 6px; text-align: center; font-size: 16px; letter-spacing: 4px; }
-    #printable-grid { display: none; }
+<style>
+:root{--primary:#1e3a8a;--bg:#f8fafc;--border:#cbd5e1;--text:#0f172a;--admin:#b91c1c}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px}
+.app-container{max-width:1100px;margin:auto;background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:2px solid var(--border);margin-bottom:20px;gap:15px}
+.brand-title h1{font-size:22px;color:var(--primary);font-weight:700}.brand-title p{font-size:13px;color:#64748b}
+.auth-controls{display:flex;align-items:center;gap:10px}.status-badge{font-size:12px;padding:5px 10px;border-radius:20px;font-weight:600;background:#e2e8f0;color:#475569}.status-badge.admin{background:#fee2e2;color:#991b1b}
+.nav-tabs{display:flex;gap:10px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.tab-btn{padding:9px 16px;border:0;background:transparent;font-size:14px;font-weight:600;color:#64748b;cursor:pointer;border-radius:6px}.tab-btn.active{background:var(--primary);color:#fff}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:20px}.form-group{display:flex;flex-direction:column;gap:6px}.form-group label{font-size:12px;font-weight:700;color:#334155;text-transform:uppercase}.form-group input,.form-group select,.form-group textarea{padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px}.full-width{grid-column:1/-1}
+.btn{padding:10px 18px;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px}.btn-primary{background:var(--primary);color:#fff}.btn-admin{background:var(--admin);color:#fff}.btn-secondary{background:#e2e8f0;color:#1e293b}.btn-danger{background:#ef4444;color:#fff}
+.btn:disabled{opacity:.6;cursor:not-allowed}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.search-box{flex:1;min-width:250px}.search-box input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:6px}
+.table-container{overflow:auto;border:1px solid var(--border);border-radius:8px}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}th,td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:top}th{background:#f1f5f9;font-weight:700;color:#334155}
+.admin-only-cell{display:none!important}body.admin-mode .admin-only-cell{display:table-cell!important}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;justify-content:center;align-items:center;z-index:9999}.modal{background:#fff;padding:24px;border-radius:8px;width:320px;box-shadow:0 10px 25px rgba(0,0,0,.2)}.modal input{width:100%;padding:10px;margin:16px 0;border:1px solid var(--border);border-radius:6px;text-align:center;font-size:16px;letter-spacing:4px}
+#status-message{margin-top:12px;font-size:13px;color:#64748b}
+#printable-grid{display:none}
 
-    @media print {
-      @page { size: A4 portrait; margin: 4mm; }
-      body * { visibility: hidden !important; }
-      #printable-grid, #printable-grid * { visibility: visible !important; }
-      #printable-grid { 
-        display: grid !important; 
-        grid-template-columns: 1fr 1fr; 
-        grid-template-rows: repeat(2, auto); 
-        gap: 4mm; 
-        width: 200mm; 
-        position: absolute; 
-        top: 0; 
-        left: 0; 
-        background: #fff; 
-      }
-      .exact-ship-label { 
-        border: 2px solid #000; 
-        padding: 10px; 
-        box-sizing: border-box; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: space-between; 
-        font-family: Arial, sans-serif; 
-        background: #fff;
-      }
-      .label-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1.5px solid #000; padding-bottom: 8px; }
-      .amount-box { text-align: right; }
-      .amount-title { font-size: 13px; font-weight: 900; }
-      .amount-val { font-size: 14px; font-weight: 900; margin-top: 2px; }
-      .amount-words { font-size: 9px; font-weight: bold; text-transform: uppercase; margin-top: 2px; }
-      .to-section { border-bottom: 1.5px solid #000; padding: 10px 0; }
-      .patient-name { font-size: 15px; font-weight: 900; text-transform: uppercase; margin: 4px 0; }
-      .patient-address { font-size: 11px; line-height: 1.35; text-transform: uppercase; margin-top: 6px; }
-      .patient-phone { font-size: 14px; font-weight: 900; margin-top: 8px; }
-      .meta-info { font-size: 10px; margin-top: 8px; line-height: 1.3; }
-      .from-section { padding-top: 8px; font-size: 10px; line-height: 1.3; text-transform: uppercase; }
-    }
-  </style>
+@media(max-width:700px){body{padding:8px}.app-container{padding:14px}header{align-items:flex-start;flex-direction:column}.auth-controls{width:100%;justify-content:space-between}.nav-tabs{overflow:auto}.tab-btn{white-space:nowrap}.toolbar>div:last-child{width:100%;display:flex;flex-wrap:wrap}.toolbar button{flex:1}.form-grid{grid-template-columns:1fr}}
+
+@media print{
+ @page{size:A4 portrait;margin:4mm}
+ body *{visibility:hidden!important}
+ #printable-grid,#printable-grid *{visibility:visible!important}
+ #printable-grid{display:grid!important;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:4mm;width:200mm;height:289mm;position:absolute;top:0;left:0;background:#fff}
+ .exact-ship-label{border:2px solid #000;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;font-family:Arial,sans-serif;background:#fff;min-height:0;overflow:hidden}
+ .label-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px solid #000;padding-bottom:8px;gap:8px}
+ .brand-logo-text{font-size:16px;font-weight:900;line-height:1.1}.brand-sub{font-size:8px;margin-top:2px}
+ .amount-box{text-align:right}.amount-title{font-size:12px;font-weight:900}.amount-val{font-size:15px;font-weight:900;margin-top:2px}.amount-words{font-size:8px;font-weight:bold;text-transform:uppercase;margin-top:2px;max-width:145px}
+ .to-section{border-bottom:1.5px solid #000;padding:8px 0}.to-title{font-size:10px;font-weight:900}.patient-name{font-size:15px;font-weight:900;text-transform:uppercase;margin:3px 0}.patient-address{font-size:10px;line-height:1.35;text-transform:uppercase;margin-top:5px}.patient-phone{font-size:13px;font-weight:900;margin-top:7px}
+ .meta-info{font-size:9px;margin-top:7px;line-height:1.3}.from-section{padding-top:7px;font-size:9px;line-height:1.3;text-transform:uppercase}.label-note{font-size:8px;margin-top:5px;font-weight:bold}
+}
+</style>
 </head>
-<body class="staff-mode">
 
-  <div class="app-container">
-    <header>
-      <div class="brand-title">
-        <h1>VITI CARE AYURVEDA</h1>
-        <p>Dispatch & 4-in-1 Label Printing Management System</p>
-      </div>
-      <div class="auth-controls">
-        <span id="role-badge" class="status-badge">Staff Access</span>
-        <button id="admin-toggle-btn" class="btn btn-secondary" onclick="openAdminModal()">Unlock Admin</button>
-      </div>
-    </header>
-
-    <div class="nav-tabs">
-      <button class="tab-btn active" onclick="switchTab('booking-tab', this)">New Parcel Booking</button>
-      <button class="tab-btn" onclick="switchTab('records-tab', this)">Patient Records & Labels</button>
-    </div>
-
-    <div id="booking-tab" class="tab-content">
-      <form id="parcel-form" onsubmit="handleFormSubmit(event)">
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Payment Type *</label>
-            <select id="paymentType" required>
-              <option value="COD">VP COD PARCEL</option>
-              <option value="PREPAID">PREPAID PARCEL</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Order Amount (₹) *</label>
-            <input type="number" id="orderAmount" value="1500" required>
-          </div>
-          <div class="form-group">
-            <label>Parcel Weight *</label>
-            <input type="text" id="parcelWeight" value="300 gms" required>
-          </div>
-          <div class="form-group">
-            <label>Patient Name *</label>
-            <input type="text" id="patientName" placeholder="RAMGOPAL KUSHWAHA" required>
-          </div>
-          <div class="form-group">
-            <label>C/O or S/O Name</label>
-            <input type="text" id="coName" placeholder="C/O - SHIV PRASAD KUSHWAHA">
-          </div>
-          <div class="form-group">
-            <label>Mobile Number *</label>
-            <input type="text" id="mobileNo" placeholder="9755559343" required>
-          </div>
-          <div class="form-group full-width">
-            <label>Full Delivery Address / Village / Locality *</label>
-            <textarea id="fullAddress" rows="2" placeholder="AT - TARONKALA, POST - TAEONKALA" required></textarea>
-          </div>
-          <div class="form-group">
-            <label>District & State *</label>
-            <input type="text" id="districtState" placeholder="HOSHANGABAD, MADHYA PRADESH" required>
-          </div>
-          <div class="form-group">
-            <label>PIN Code *</label>
-            <input type="text" id="pincode" placeholder="461001" required>
-          </div>
-          <div class="form-group">
-            <label>Product Name</label>
-            <input type="text" id="productName" value="SKIN CARE MEDICINE">
-          </div>
-          <div class="form-group">
-            <label>Remarks</label>
-            <input type="text" id="remarks" value="URGENT MEDICINE">
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary">Save Parcel to Firebase</button>
-      </form>
-    </div>
-
-    <div id="records-tab" class="tab-content" style="display: none;">
-      <div class="toolbar">
-        <div class="search-box">
-          <input type="text" id="searchInput" oninput="filterRecords()" placeholder="🔍 Search Patient Name, Mobile, AWB, Address, PIN...">
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" onclick="printSelectedGrid()">🖨️ Print Selected (4-in-1 A4)</button>
-          <button id="admin-export-btn" class="btn btn-secondary admin-only-cell" onclick="exportToCSV()" style="display:none;">📥 Export CSV</button>
-          <button id="admin-clear-btn" class="btn btn-danger admin-only-cell" onclick="clearAllData()" style="display:none;">🗑️ Clear Database</button>
-        </div>
-      </div>
-
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th>
-              <th>Date</th>
-              <th>Order / AWB</th>
-              <th>Patient Details</th>
-              <th>Mobile</th>
-              <th>Amount</th>
-              <th>Address</th>
-              <th class="admin-only-cell">Action</th>
-            </tr>
-          </thead>
-          <tbody id="recordsTableBody"></tbody>
-        </table>
-      </div>
-    </div>
+<body>
+<div class="app-container">
+<header>
+  <div class="brand-title">
+    <h1>VITI CARE AYURVEDA</h1>
+    <p>Dispatch & 4-in-1 Label Printing Management System</p>
   </div>
-
-  <div id="printable-grid"></div>
-
-  <div id="adminModal" class="modal-overlay">
-    <div class="modal">
-      <h3>Enter Admin PIN</h3>
-      <input type="password" id="adminPinInput" maxlength="6" placeholder="****">
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
-        <button class="btn btn-admin" onclick="verifyAdminPin()">Unlock</button>
-      </div>
-    </div>
+  <div class="auth-controls">
+    <span id="role-badge" class="status-badge">Staff Access</span>
+    <button id="admin-toggle-btn" class="btn btn-secondary" onclick="openAdminModal()">Unlock Admin</button>
   </div>
+</header>
 
-  <script>
-    let isAdmin = false;
-    const ADMIN_PIN = "8282";
-    let parcelRecords = [];
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="switchTab('booking-tab',this)">New Parcel Booking</button>
+  <button class="tab-btn" onclick="switchTab('records-tab',this)">Patient Records & Labels</button>
+</div>
 
-    const parcelsRef = database.ref('parcels');
-    parcelsRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      parcelRecords = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          parcelRecords.push({ id: key, ...data[key] });
-        });
-      }
-      renderRecords(parcelRecords);
-    }, (error) => {
-      console.error("Firebase Read Error: ", error);
-      alert("Database connection error! Please check internet or Firebase rules.");
-    });
+<div id="booking-tab" class="tab-content">
+<form id="parcel-form" onsubmit="handleFormSubmit(event)">
+<div class="form-grid">
+<div class="form-group"><label>Payment Type *</label><select id="paymentType" required><option value="COD">VP COD PARCEL</option><option value="PREPAID">PREPAID PARCEL</option></select></div>
+<div class="form-group"><label>Order Amount (鈧�) *</label><input type="number" id="orderAmount" value="1500" min="0" required></div>
+<div class="form-group"><label>Parcel Weight *</label><input type="text" id="parcelWeight" value="300 gms" required></div>
+<div class="form-group"><label>Patient Name *</label><input type="text" id="patientName" placeholder="RAMGOPAL KUSHWAHA" required></div>
+<div class="form-group"><label>C/O or S/O Name</label><input type="text" id="coName" placeholder="C/O - SHIV PRASAD KUSHWAHA"></div>
+<div class="form-group"><label>Mobile Number *</label><input type="text" id="mobileNo" placeholder="9755559343" required></div>
+<div class="form-group full-width"><label>Full Delivery Address / Village / Locality *</label><textarea id="fullAddress" rows="2" placeholder="AT - TARONKALA, POST - TAEONKALA" required></textarea></div>
+<div class="form-group"><label>District & State *</label><input type="text" id="districtState" placeholder="HOSHANGABAD, MADHYA PRADESH" required></div>
+<div class="form-group"><label>PIN Code *</label><input type="text" id="pincode" placeholder="461001" required></div>
+<div class="form-group"><label>Product Name</label><input type="text" id="productName" value="SKIN CARE MEDICINE"></div>
+<div class="form-group"><label>Remarks</label><input type="text" id="remarks" value="URGENT MEDICINE"></div>
+</div>
+<button id="save-btn" type="submit" class="btn btn-primary">馃捑 Save Parcel to Firebase</button>
+<div id="status-message"></div>
+</form>
+</div>
 
-    function numberToWords(num) {
-      const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
-      const b = ['', '', 'Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
-      if ((num = num.toString()).length > 9) return 'overflow';
-      let n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-      if (!n) return ''; 
-      let str = '';
-      str += (n[1] != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
-      str += (n[2] != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
-      str += (n[3] != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
-      str += (n[4] != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
-      str += (n[5] != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-      return str.trim() + ' ONLY';
-    }
+<div id="records-tab" class="tab-content" style="display:none">
+<div class="toolbar">
+<div class="search-box"><input type="text" id="searchInput" oninput="filterRecords()" placeholder="馃攳 Search Patient Name, Mobile, AWB, Address, PIN..."></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="printSelectedGrid()">馃枿锔� Print Selected (4-in-1 A4)</button>
+<button class="btn btn-secondary admin-only-cell" onclick="exportToCSV()">馃摜 Export CSV</button>
+<button class="btn btn-danger admin-only-cell" onclick="clearAllData()">馃棏锔� Clear Database</button>
+</div>
+</div>
+<div class="table-container">
+<table><thead><tr>
+<th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)"></th><th>Date</th><th>Order / AWB</th><th>Patient Details</th><th>Mobile</th><th>Amount</th><th>Address</th><th class="admin-only-cell">Action</th>
+</tr></thead><tbody id="recordsTableBody"></tbody></table>
+</div>
+</div>
+</div>
 
-    function switchTab(tabId, btn) {
-      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      document.getElementById(tabId).style.display = 'block';
-      btn.classList.add('active');
-    }
+<div id="printable-grid"></div>
 
-    function openAdminModal() {
-      if(isAdmin) {
-        isAdmin = false;
-        document.body.classList.remove('admin-mode');
-        document.getElementById('role-badge').innerText = "Staff Access";
-        document.getElementById('role-badge').classList.remove('admin');
-        document.getElementById('admin-toggle-btn').innerText = "Unlock Admin";
-        document.querySelectorAll('.admin-only-cell').forEach(el => el.style.display = 'none');
-        renderRecords(parcelRecords);
-      } else {
-        document.getElementById('adminModal').style.display = 'flex';
-        document.getElementById('adminPinInput').focus();
-      }
-    }
+<div id="adminModal" class="modal-overlay" onclick="if(event.target===this)closeAdminModal()">
+<div class="modal">
+<h3>Enter Admin PIN</h3>
+<input type="password" id="adminPinInput" maxlength="6" inputmode="numeric" placeholder="****" onkeydown="if(event.key==='Enter')verifyAdminPin()">
+<div style="display:flex;justify-content:flex-end;gap:8px">
+<button class="btn btn-secondary" onclick="closeAdminModal()">Cancel</button>
+<button class="btn btn-admin" onclick="verifyAdminPin()">Unlock</button>
+</div>
+</div>
+</div>
 
-    function closeAdminModal() {
-      document.getElementById('adminModal').style.display = 'none';
-      document.getElementById('adminPinInput').value = '';
-    }
+<script>
+let isAdmin=false;
+const ADMIN_PIN="8282";
+let parcelRecords=[];
+const parcelsRef=database.ref("parcels");
 
-    function verifyAdminPin() {
-      if (document.getElementById('adminPinInput').value === ADMIN_PIN) {
-        isAdmin = true;
-        document.body.classList.add('admin-mode');
-        document.getElementById('role-badge').innerText = "Admin Access (Unlocked)";
-        document.getElementById('role-badge').classList.add('admin');
-        document.getElementById('admin-toggle-btn').innerText = "Lock Admin";
-        document.querySelectorAll('.admin-only-cell').forEach(el => el.style.display = 'table-cell');
-        closeAdminModal();
-        renderRecords(parcelRecords);
-      } else {
-        alert("Incorrect PIN! Default Admin PIN is 8282");
-      }
-    }
+parcelsRef.on("value",snapshot=>{
+  const data=snapshot.val();
+  parcelRecords=[];
+  if(data){
+    Object.keys(data).forEach(key=>parcelRecords.push({id:key,...data[key]}));
+  }
+  filterRecords();
+},error=>{
+  console.error(error);
+  document.getElementById("status-message").textContent="Firebase connection error: "+error.message;
+  alert("Database connection error. Firebase Database Rules/Internet check karein.");
+});
 
-    function handleFormSubmit(e) {
-      e.preventDefault();
-      const newRecord = {
-        date: new Date().toISOString().split('T')[0],
-        orderNo: "VK-" + Math.floor(100 + Math.random() * 900),
-        awb: "14" + Math.floor(100000000000 + Math.random() * 900000000000),
-        paymentType: document.getElementById('paymentType').value,
-        amount: parseFloat(document.getElementById('orderAmount').value),
-        weight: document.getElementById('parcelWeight').value,
-        patientName: document.getElementById('patientName').value.toUpperCase(),
-        coName: document.getElementById('coName').value.toUpperCase(),
-        mobile: document.getElementById('mobileNo').value,
-        address: document.getElementById('fullAddress').value.toUpperCase(),
-        districtState: document.getElementById('districtState').value.toUpperCase(),
-        pincode: document.getElementById('pincode').value,
-        product: document.getElementById('productName').value.toUpperCase(),
-        remarks: document.getElementById('remarks').value.toUpperCase(),
-        from: "PRADIP KUMAR YADAV, AT - 2 NO. TILJALA ROAD, KOLKATA, PINCODE - 700039, Mob No. - +918282003938"
-      };
+function esc(v){
+  return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
 
-      parcelsRef.push(newRecord).then(() => {
-        alert("Parcel Saved to Cloud Database Successfully!");
-        document.getElementById('parcel-form').reset();
-        switchTab('records-tab', document.querySelectorAll('.tab-btn')[1]);
-      }).catch((error) => {
-        alert("Failed to save: " + error.message);
-      });
-    }
+function numberToWords(num){
+  num=Math.floor(Number(num)||0);
+  if(num===0)return"ZERO ONLY";
+  const a=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function two(n){return n<20?a[n]:b[Math.floor(n/10)]+(n%10?" "+a[n%10]:"")}
+  function part(n,unit){return n?two(n)+unit:""}
+  let crore=Math.floor(num/10000000);num%=10000000;
+  let lakh=Math.floor(num/100000);num%=100000;
+  let thousand=Math.floor(num/1000);num%=1000;
+  let hundred=Math.floor(num/100);let rest=num%100;
+  let s="";
+  if(crore)s+=two(crore)+" CRORE ";
+  if(lakh)s+=two(lakh)+" LAKH ";
+  if(thousand)s+=two(thousand)+" THOUSAND ";
+  if(hundred)s+=a[hundred]+" HUNDRED ";
+  if(rest)s+=(s?"AND ":"")+two(rest)+" ";
+  return s.trim()+" ONLY";
+}
 
-    function renderRecords(data) {
-      const tbody = document.getElementById('recordsTableBody');
-      tbody.innerHTML = '';
-      if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 20px;">No records found.</td></tr>`;
-        return;
-      }
-      data.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><input type="checkbox" class="row-checkbox" value="${item.id}"></td>
-          <td>${item.date}</td>
-          <td><strong>${item.orderNo}</strong><br><small>AWB: ${item.awb}</small></td>
-          <td><strong>${item.patientName}</strong><br><small>${item.coName || ''}</small></td>
-          <td>${item.mobile}</td>
-          <td><strong>₹${item.amount}</strong> (${item.paymentType})</td>
-          <td>${item.address}, ${item.districtState} - ${item.pincode}</td>
-          <td class="admin-only-cell" style="${isAdmin ? 'display:table-cell;' : 'display:none;'}">
-            <button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteRecord('${item.id}')">Delete</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+function switchTab(id,btn){
+ document.querySelectorAll(".tab-content").forEach(e=>e.style.display="none");
+ document.querySelectorAll(".tab-btn").forEach(e=>e.classList.remove("active"));
+ document.getElementById(id).style.display="block";btn.classList.add("active");
+ if(id==="records-tab")filterRecords();
+}
 
-    function filterRecords() {
-      const q = document.getElementById('searchInput').value.toLowerCase().trim();
-      const filtered = parcelRecords.filter(r => 
-        r.patientName.toLowerCase().includes(q) ||
-        r.mobile.includes(q) ||
-        r.awb.includes(q) ||
-        r.orderNo.toLowerCase().includes(q) ||
-        r.address.toLowerCase().includes(q)
-      );
-      renderRecords(filtered);
-    }
+function openAdminModal(){
+ if(isAdmin){
+  isAdmin=false;document.body.classList.remove("admin-mode");
+  document.getElementById("role-badge").textContent="Staff Access";
+  document.getElementById("role-badge").classList.remove("admin");
+  document.getElementById("admin-toggle-btn").textContent="Unlock Admin";
+  renderRecords(parcelRecords);return;
+ }
+ document.getElementById("adminModal").style.display="flex";
+ document.getElementById("adminPinInput").value="";
+ setTimeout(()=>document.getElementById("adminPinInput").focus(),50);
+}
+function closeAdminModal(){document.getElementById("adminModal").style.display="none";document.getElementById("adminPinInput").value=""}
+function verifyAdminPin(){
+ if(document.getElementById("adminPinInput").value===ADMIN_PIN){
+  isAdmin=true;document.body.classList.add("admin-mode");
+  document.getElementById("role-badge").textContent="Admin Access (Unlocked)";
+  document.getElementById("role-badge").classList.add("admin");
+  document.getElementById("admin-toggle-btn").textContent="Lock Admin";
+  closeAdminModal();renderRecords(parcelRecords);
+ }else alert("Incorrect PIN!");
+}
 
-    function toggleSelectAll(master) {
-      document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = master.checked);
-    }
+function handleFormSubmit(e){
+ e.preventDefault();
+ const saveBtn=document.getElementById("save-btn");
+ saveBtn.disabled=true;saveBtn.textContent="鈴� Saving...";
+ const now=new Date();
+ const newRecord={
+  date:now.toISOString().split("T")[0],
+  createdAt:firebase.database.ServerValue.TIMESTAMP,
+  orderNo:"VK-"+Math.floor(100+Math.random()*900),
+  awb:"14"+Math.floor(100000000000+Math.random()*900000000000),
+  paymentType:document.getElementById("paymentType").value,
+  amount:parseFloat(document.getElementById("orderAmount").value)||0,
+  weight:document.getElementById("parcelWeight").value.trim(),
+  patientName:document.getElementById("patientName").value.trim().toUpperCase(),
+  coName:document.getElementById("coName").value.trim().toUpperCase(),
+  mobile:document.getElementById("mobileNo").value.trim(),
+  address:document.getElementById("fullAddress").value.trim().toUpperCase(),
+  districtState:document.getElementById("districtState").value.trim().toUpperCase(),
+  pincode:document.getElementById("pincode").value.trim(),
+  product:document.getElementById("productName").value.trim().toUpperCase(),
+  remarks:document.getElementById("remarks").value.trim().toUpperCase(),
+  from:"PRADIP KUMAR YADAV, AT - 2 NO. TILJALA ROAD, KOLKATA, PINCODE - 700039, MOB NO. - +918282003938"
+ };
+ parcelsRef.push(newRecord).then(()=>{
+  alert("Parcel Saved to Cloud Database Successfully!");
+  document.getElementById("parcel-form").reset();
+  document.getElementById("orderAmount").value=1500;
+  document.getElementById("parcelWeight").value="300 gms";
+  document.getElementById("productName").value="SKIN CARE MEDICINE";
+  document.getElementById("remarks").value="URGENT MEDICINE";
+  switchTab("records-tab",document.querySelectorAll(".tab-btn")[1]);
+ }).catch(err=>alert("Failed to save: "+err.message))
+ .finally(()=>{saveBtn.disabled=false;saveBtn.textContent="馃捑 Save Parcel to Firebase"});
+}
 
-    function deleteRecord(id) {
-      if (!isAdmin) return;
-      if (confirm("Are you sure you want to delete this parcel record from cloud?")) {
-        database.ref('parcels/' + id).remove();
-      }
-    }
+function renderRecords(data){
+ const tbody=document.getElementById("recordsTableBody");tbody.innerHTML="";
+ if(!data.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px">No records found.</td></tr>';return}
+ data.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).forEach(item=>{
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+  <td><input type="checkbox" class="row-checkbox" value="${esc(item.id)}"></td>
+  <td>${esc(item.date)}</td>
+  <td><strong>${esc(item.orderNo)}</strong><br><small>AWB: ${esc(item.awb)}</small></td>
+  <td><strong>${esc(item.patientName)}</strong><br><small>${esc(item.coName)}</small></td>
+  <td>${esc(item.mobile)}</td>
+  <td><strong>鈧�${esc(item.amount)}</strong><br><small>${esc(item.paymentType)}</small></td>
+  <td>${esc(item.address)}, ${esc(item.districtState)} - ${esc(item.pincode)}</td>
+  <td class="admin-only-cell"><button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="deleteRecord('${esc(item.id)}')">Delete</button></td>`;
+  tbody.appendChild(tr);
+ });
+ document.getElementById("selectAll").checked=false;
+}
 
-    function clearAllData() {
-      if (!isAdmin) return;
-      if (confirm("WARNING: This will permanently delete ALL parcel records from Cloud Database!")) {
-        parcelsRef.remove();
-      }
-    }
+function filterRecords(){
+ const q=document.getElementById("searchInput").value.toLowerCase().trim();
+ const filtered=parcelRecords.filter(r=>
+  [r.patientName,r.mobile,r.awb,r.orderNo,r.address,r.pincode,r.districtState,r.coName].some(v=>String(v||"").toLowerCase().includes(q))
+ );
+ renderRecords(filtered);
+}
 
-    function exportToCSV() {
-      if (!isAdmin) return;
-      let csv = "Date,OrderNo,AWB,PaymentType,Amount,Weight,PatientName,CoName,Mobile,Address,DistrictState,PIN\n";
-      parcelRecords.forEach(r => {
-        csv += `"${r.date}","${r.orderNo}","${r.awb}","${r.paymentType}","${r.amount}","${r.weight}","${r.patientName}","${r.coName}","${r.mobile}","${r.address}","${r.districtState}","${r.pincode}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a');
-      a.href = window.URL.createObjectURL(blob);
-      a.download = `Viti_Care_Parcels_${new Date().toISOString().split('T')[0]}.csv`;
-      a.click();
-    }
+function toggleSelectAll(master){document.querySelectorAll(".row-checkbox").forEach(cb=>cb.checked=master.checked)}
 
-    function printSelectedGrid() {
-      const selectedBoxes = document.querySelectorAll('.row-checkbox:checked');
-      if (selectedBoxes.length === 0) {
-        alert("Kripya print karne ke liye kam se kam 1 record select karein.");
-        return;
-      }
-      if (selectedBoxes.length > 4) {
-        alert("Ek page par maximum 4 labels print ho sakte hain.");
-        return;
-      }
-      const selectedIds = Array.from(selectedBoxes).map(cb => cb.value);
-      const selectedItems = parcelRecords.filter(r => selectedIds.includes(r.id));
-      const printGrid = document.getElementById('printable-grid');
-      printGrid.innerHTML = '';
+function deleteRecord(id){
+ if(!isAdmin)return;
+ if(confirm("Are you sure you want to delete this parcel record?"))database.ref("parcels/"+id).remove().catch(e=>alert(e.message));
+}
+function clearAllData(){
+ if(!isAdmin)return;
+ if(confirm("WARNING: This will permanently delete ALL parcel records! Continue?"))parcelsRef.remove().catch(e=>alert(e.message));
+}
+function csvCell(v){return '"'+String(v??"").replace(/"/g,'""')+'"'}
+function exportToCSV(){
+ if(!isAdmin)return;
+ let csv="Date,OrderNo,AWB,PaymentType,Amount,Weight,PatientName,CoName,Mobile,Address,DistrictState,PIN,Product,Remarks\n";
+ parcelRecords.forEach(r=>csv+=[r.date,r.orderNo,r.awb,r.paymentType,r.amount,r.weight,r.patientName,r.coName,r.mobile,r.address,r.districtState,r.pincode,r.product,r.remarks].map(csvCell).join(",")+"\n");
+ const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Viti_Care_Parcels_"+new Date().toISOString().split("T")[0]+".csv";a.click();URL.revokeObjectURL(a.href);
+}
 
-      selectedItems.forEach(item => {
-        printGrid.innerHTML += `
-          <div class="exact-ship-label">
-            <div class="label-header">
-              <div class="brand-logo-text"><s
+function makeLabel(item){
+ const address=[item.address,item.districtState,item.pincode].filter(Boolean).join(", ");
+ return `<div class="exact-ship-label">
+  <div class="label-header">
+   <div><div class="brand-logo-text">VITI CARE AYURVEDA</div><div class="brand-sub">DISPATCH / MEDICINE PARCEL</div></div>
+   <div class="amount-box">
+    <div class="amount-title">${item.paymentType==="COD"?"VP COD PARCEL":"PREPAID PARCEL"}</div>
+    <div class="amount-val">鈧�${esc(item.amount)}</div>
+    <div class="amount-words">${esc(numberToWords(item.amount))}</div>
+   </div>
+  </div>
+  <div class="to-section">
+   <div class="to-title">TO</div>
+   <div class="patient-name">${esc(item.patientName)}</div>
+   ${item.coName?`<div style="font-size:10px;font-weight:bold">${esc(item.coName)}</div>`:""}
+   <div class="patient-address">${esc(address)}</div>
+   <div class="patient-phone">MOB: ${esc(item.mobile)}</div>
+  </div>
+  <div class="meta-info">
+   <strong>ORDER:</strong> ${esc(item.orderNo)} &nbsp; <strong>AWB:</strong> ${esc(item.awb)}<br>
+   <strong>WEIGHT:</strong> ${esc(item.weight)} &nbsp; <strong>PRODUCT:</strong> ${esc(item.product||"MEDICINE")}<br>
+   <strong>REMARKS:</strong> ${esc(item.remarks||"")}
+  </div>
+  <div class="from-section"><strong>FROM:</strong><br>${esc(item.from||"VITI CARE AYURVEDA")}</div>
+  <div class="label-note">PLEASE HANDLE WITH CARE</div>
+ </div>`;
+}
+
+function printSelectedGrid(){
+ const boxes=[...document.querySelectorAll(".row-checkbox:checked")];
+ if(!boxes.length){alert("Kripya print karne ke liye kam se kam 1 record select karein.");return}
+ if(boxes.length>4){alert("Ek page par maximum 4 labels print ho sakte hain.");return}
+ const ids=boxes.map(x=>x.value);
+ const selected=parcelRecords.filter(r=>ids.includes(r.id));
+ document.getElementById("printable-grid").innerHTML=selected.map(makeLabel).join("");
+ window.print();
+}
+
+document.addEventListener("afterprint",()=>document.getElementById("printable-grid").innerHTML="");
+</script>
+</body>
+</html>
